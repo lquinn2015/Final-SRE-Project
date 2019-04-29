@@ -1,0 +1,70 @@
+{ Game   : AoK HD.exe
+  Version: 
+  Date   : 2019-04-07
+  Author : Luke
+
+  Double the resource gained
+}
+
+define(address,"AoK HD.exe"+34D008)
+define(bytes,F3 0F 58 04 90)
+
+[ENABLE]
+
+assert(address,bytes)
+alloc(newmem,$1000)
+
+label(code)
+label(return)
+label(nonhuman)
+newmem:
+
+code:
+  pushfd
+  cmp edi,1   // WE need an identifier I think a player is set as human
+  jne nonhuman
+  addss xmm0, xmm0
+nonhuman:
+  addss xmm0,dword ptr [eax+edx*4]
+  popfd
+  jmp return
+
+address:
+  jmp newmem
+return:
+
+[DISABLE]
+
+address:
+  db bytes
+  // addss xmm0,dword ptr [eax+edx*4]
+
+dealloc(newmem)
+
+{
+// ORIGINAL CODE - INJECTION POINT: "AoK HD.exe"+34D008
+
+"AoK HD.exe"+34CFE3: 56                          -  push esi
+"AoK HD.exe"+34CFE4: 66 8B 75 08                 -  mov si,[ebp+08]
+"AoK HD.exe"+34CFE8: 66 85 F6                    -  test si,si
+"AoK HD.exe"+34CFEB: 0F 88 BD 00 00 00           -  js "AoK HD.exe"+34D0AE
+"AoK HD.exe"+34CFF1: 0F BF D6                    -  movsx edx,si
+"AoK HD.exe"+34CFF4: 3B 51 38                    -  cmp edx,[ecx+38]
+"AoK HD.exe"+34CFF7: 0F 8D B1 00 00 00           -  jnl "AoK HD.exe"+34D0AE
+"AoK HD.exe"+34CFFD: 8B 41 3C                    -  mov eax,[ecx+3C]
+"AoK HD.exe"+34D000: F3 0F 10 4D 0C              -  movss xmm1,[ebp+0C]
+"AoK HD.exe"+34D005: 0F 28 C1                    -  movaps xmm0,xmm1
+// ---------- INJECTING HERE ----------
+"AoK HD.exe"+34D008: F3 0F 58 04 90              -  addss xmm0,dword ptr [eax+edx*4]
+// ---------- DONE INJECTING  ----------
+"AoK HD.exe"+34D00D: F3 0F 11 04 90              -  movss [eax+edx*4],xmm0
+"AoK HD.exe"+34D012: 66 83 FE 0B                 -  cmp si,0B
+"AoK HD.exe"+34D016: 75 19                       -  jne "AoK HD.exe"+34D031
+"AoK HD.exe"+34D018: 8B 41 3C                    -  mov eax,[ecx+3C]
+"AoK HD.exe"+34D01B: F3 0F 10 04 90              -  movss xmm0,[eax+edx*4]
+"AoK HD.exe"+34D020: 0F 2F 81 CC 1A 00 00        -  comiss xmm0,[ecx+00001ACC]
+"AoK HD.exe"+34D027: 76 08                       -  jna "AoK HD.exe"+34D031
+"AoK HD.exe"+34D029: F3 0F 11 81 CC 1A 00 00     -  movss [ecx+00001ACC],xmm0
+"AoK HD.exe"+34D031: 83 79 08 03                 -  cmp dword ptr [ecx+08],03
+"AoK HD.exe"+34D035: 75 77                       -  jne "AoK HD.exe"+34D0AE
+}

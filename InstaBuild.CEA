@@ -1,0 +1,88 @@
+{ Game   : AoK HD.exe
+  Version: 
+  Date   : 2019-04-21
+  Author : Luke
+
+  Instantly complete buildings!
+}
+
+[ENABLE]
+
+aobscanmodule(INJECT,AoK HD.exe,F3 0F 11 97 50 02 00 00) // should be unique
+alloc(newmem,$1000)
+
+label(code)
+label(return)
+
+newmem:
+  //EAX free
+  // EDI building info
+  // ECX this building
+
+  // we need a comparison for a player
+  movzx eax, [ecx+2a]
+  cvtsi2ss xmm2,eax
+
+  movss [edi+250], xmm2
+
+  movzx eax, [edi+34] // To avoid cheat protection lets do
+  cvtsi2ss xmm2, eax // the up in steps expo style
+  addss xmm2, xmm2
+  movss [edi+34] xmm2
+
+  /* Cheat protection :(
+  movzx eax,word ptr [edi+2A] // move max hp to eax
+  cvtsi2ss xmm2,eax  // move hp to a float point object
+  movss [edi+34], xmm2
+
+  movzx eax, word ptr [ecx+19E]
+  cvtsi2ss xmm2, eax   // move the max time into the next time
+  // we don't set because the return instruction does this
+  */
+code:
+  //movss [edi+00000250],xmm2
+  jmp return
+
+INJECT:
+  jmp newmem
+  nop
+  nop
+  nop
+return:
+registersymbol(INJECT)
+
+[DISABLE]
+
+INJECT:
+  db F3 0F 11 97 50 02 00 00
+
+unregistersymbol(INJECT)
+dealloc(newmem)
+
+{
+// ORIGINAL CODE - INJECTION POINT: "AoK HD.exe"+4BAA53
+
+"AoK HD.exe"+4BAA2E: F3 0F 11 4F 34           -  movss [edi+34],xmm1
+"AoK HD.exe"+4BAA33: 0F BF 41 2A              -  movsx eax,word ptr [ecx+2A]
+"AoK HD.exe"+4BAA37: 66 0F 6E C0              -  movd xmm0,eax
+"AoK HD.exe"+4BAA3B: 0F 5B C0                 -  cvtdq2ps xmm0,xmm0
+"AoK HD.exe"+4BAA3E: 0F 2F C8                 -  comiss xmm1,xmm0
+"AoK HD.exe"+4BAA41: 76 0C                    -  jna "AoK HD.exe"+4BAA4F
+"AoK HD.exe"+4BAA43: 66 0F 6E C0              -  movd xmm0,eax
+"AoK HD.exe"+4BAA47: 0F 5B C0                 -  cvtdq2ps xmm0,xmm0
+"AoK HD.exe"+4BAA4A: F3 0F 11 47 34           -  movss [edi+34],xmm0
+"AoK HD.exe"+4BAA4F: F3 0F 58 D3              -  addss xmm2,xmm3
+// ---------- INJECTING HERE ----------
+"AoK HD.exe"+4BAA53: F3 0F 11 97 50 02 00 00  -  movss [edi+00000250],xmm2
+// ---------- DONE INJECTING  ----------
+"AoK HD.exe"+4BAA5B: 0F BF 81 9E 01 00 00     -  movsx eax,word ptr [ecx+0000019E]
+"AoK HD.exe"+4BAA62: 66 0F 6E C0              -  movd xmm0,eax
+"AoK HD.exe"+4BAA66: 0F 5B C0                 -  cvtdq2ps xmm0,xmm0
+"AoK HD.exe"+4BAA69: 0F 2F D0                 -  comiss xmm2,xmm0
+"AoK HD.exe"+4BAA6C: 72 12                    -  jb "AoK HD.exe"+4BAA80
+"AoK HD.exe"+4BAA6E: 8B 07                    -  mov eax,[edi]
+"AoK HD.exe"+4BAA70: 8B CF                    -  mov ecx,edi
+"AoK HD.exe"+4BAA72: 6A 02                    -  push 02
+"AoK HD.exe"+4BAA74: FF 50 68                 -  call dword ptr [eax+68]
+"AoK HD.exe"+4BAA77: 5F                       -  pop edi
+}

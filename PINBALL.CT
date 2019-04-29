@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CheatTable CheatEngineTableVersion="28">
+  <CheatEntries>
+    <CheatEntry>
+      <ID>0</ID>
+      <Description>"No description"</Description>
+      <VariableType>4 Bytes</VariableType>
+      <Address>00F5EADC</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>1</ID>
+      <Description>"Auto Assemble script"</Description>
+      <LastState/>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>{ Game   : PINBALL.EXE
+  Version: 
+  Date   : 2019-03-24
+  Author : Luke
+
+  Times 20x score well actually a lot more but ya know
+}
+
+[ENABLE]
+
+//aobscanmodule(INJECT,PINBALL.EXE,89 08 C7 40 04 01 00 00 00) // should be unique
+define(INJECT, "PINBALL.EXE"+13C98)
+alloc(newmem,$1000)
+
+label(code)
+label(return)
+
+newmem:
+
+code:
+  cmp ecx, #10
+  jle @f
+  shl ecx, #26
+  @@:
+  mov [eax],ecx
+  mov [eax+04],00000001
+  jmp return
+
+INJECT:
+  jmp newmem
+  nop
+  nop
+  nop
+  nop
+return:
+registersymbol(INJECT)
+
+[DISABLE]
+
+INJECT:
+  db 89 08 C7 40 04 01 00 00 00
+
+unregistersymbol(INJECT)
+dealloc(newmem)
+
+{
+// ORIGINAL CODE - INJECTION POINT: "PINBALL.EXE"+13C98
+
+"PINBALL.EXE"+13C86: CC                    -  int 3 
+"PINBALL.EXE"+13C87: CC                    -  int 3 
+"PINBALL.EXE"+13C88: CC                    -  int 3 
+"PINBALL.EXE"+13C89: 8B FF                 -  mov edi,edi
+"PINBALL.EXE"+13C8B: 55                    -  push ebp
+"PINBALL.EXE"+13C8C: 8B EC                 -  mov ebp,esp
+"PINBALL.EXE"+13C8E: 8B 45 08              -  mov eax,[ebp+08]
+"PINBALL.EXE"+13C91: 85 C0                 -  test eax,eax
+"PINBALL.EXE"+13C93: 74 0C                 -  je PINBALL.EXE+13CA1
+"PINBALL.EXE"+13C95: 8B 4D 0C              -  mov ecx,[ebp+0C]
+// ---------- INJECTING HERE ----------
+"PINBALL.EXE"+13C98: 89 08                 -  mov [eax],ecx
+"PINBALL.EXE"+13C9A: C7 40 04 01 00 00 00  -  mov [eax+04],00000001
+// ---------- DONE INJECTING  ----------
+"PINBALL.EXE"+13CA1: 5D                    -  pop ebp
+"PINBALL.EXE"+13CA2: C2 08 00              -  ret 0008
+"PINBALL.EXE"+13CA5: CC                    -  int 3 
+"PINBALL.EXE"+13CA6: CC                    -  int 3 
+"PINBALL.EXE"+13CA7: CC                    -  int 3 
+"PINBALL.EXE"+13CA8: CC                    -  int 3 
+"PINBALL.EXE"+13CA9: CC                    -  int 3 
+"PINBALL.EXE"+13CAA: 8B FF                 -  mov edi,edi
+"PINBALL.EXE"+13CAC: 55                    -  push ebp
+"PINBALL.EXE"+13CAD: 8B EC                 -  mov ebp,esp
+}
+</AssemblerScript>
+    </CheatEntry>
+  </CheatEntries>
+  <UserdefinedSymbols/>
+</CheatTable>
